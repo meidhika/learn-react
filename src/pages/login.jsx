@@ -1,7 +1,10 @@
+import FormLogin from "../components/form/FormLogin";
+import AuthLayouts from "../components/layouts/AuthLayouts";
+
 export default function LoginPage() {
   return (
-    <div>
-      <h1>login</h1>
-    </div>
+    <AuthLayouts title="Login" type="login">
+      <FormLogin />
+    </AuthLayouts>
   );
 }

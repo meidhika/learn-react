@@ -1,7 +1,12 @@
-export default function RegisterPage() {
+import FormRegister from "../components/form/FormRegister";
+import AuthLayouts from "../components/layouts/AuthLayouts";
+
+const RegisterPage = () => {
   return (
-    <div>
-      <h1>register</h1>
-    </div>
+    <AuthLayouts title="Register" type="register">
+      <FormRegister />
+    </AuthLayouts>
   );
-}
+};
+
+export default RegisterPage;
