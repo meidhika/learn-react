@@ -12,7 +12,9 @@ export default function InputLabel({ ...props }) {
         type={type}
         name={name}
         placeholder={placeholder}
-        className="w-full p-2 border border-gray-300 rounded placeholder:opacity-5"
+        className=" w-full p-2 border border-gray-300 rounded placeholder:opacity-50
+    text-slate-600
+    dark:border-slate-700"
       />
     </div>
   );
