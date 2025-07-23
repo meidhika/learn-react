@@ -4,6 +4,7 @@ import RegisterPage from "../pages/register";
 import ProductPage from "../pages/products";
 import NotFoundPage from "../pages/404";
 import HomePage from "../pages/home";
+import BlogPage from "../pages/blogs";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: "/products",
     element: <ProductPage />,
+  },
+  {
+    path: "/blogs",
+    element: <BlogPage />,
   },
 ]);
 

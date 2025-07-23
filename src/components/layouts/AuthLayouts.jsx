@@ -6,24 +6,32 @@ const AuthLayouts = (props) => {
   const { children, title, type } = props;
   const { isDarkMode, setIsDarkMode } = useContext(DarkMode);
   return (
-    <div
-      className={`flex justify-center min-h-screen items-center ${
-        isDarkMode && "bg-slate-900"
-      }`}
-    >
-      <div className="w-full max-w-xl border border-gray-300 rounded-lg p-8">
-        <button
-          className="absolute top-5 right-5 border border-gray-300 p-2 text-white rounded"
-          onClick={() => setIsDarkMode(!isDarkMode)}
+    <div>
+      <div
+        className={`flex justify-center min-h-screen items-center ${
+          isDarkMode && "bg-slate-900"
+        }`}
+      >
+        <Link
+          to="/"
+          className="absolute top-0 left-0 bg-transparent text-white font-bold text-lg p-4"
         >
-          {isDarkMode ? "☀" : "🌙"}
-        </button>
-        <h1 className="text-3xl font-bold mb-2 text-blue-500">{title}</h1>
-        <p className="font-medium text-slate-600 mb-8">
-          Welcome, Please Enter Your Details
-        </p>
-        {children}
-        <Navigation type={type} />
+          Home
+        </Link>
+        <div className="w-full max-w-xl border border-gray-300 rounded-lg p-8">
+          <button
+            className="absolute top-5 right-5 border border-gray-300 p-2 text-white rounded"
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            {isDarkMode ? "☀" : "🌙"}
+          </button>
+          <h1 className="text-3xl font-bold mb-2 text-blue-500">{title}</h1>
+          <p className="font-medium text-slate-600 mb-8">
+            Welcome, Please Enter Your Details
+          </p>
+          {children}
+          <Navigation type={type} />
+        </div>
       </div>
     </div>
   );
