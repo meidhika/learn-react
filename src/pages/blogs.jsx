@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createPost, getAllPosts } from "../services/post.service";
+import { createPost, deletePost, getAllPosts } from "../services/post.service";
 import loading from "../assets/loading.png";
 import loadingButton from "../assets/loading-button.png";
 import BlogLayout from "../components/layouts/BlogLayout";
@@ -10,6 +10,8 @@ import { useState } from "react";
 
 const BlogPageLayout = () => {
   const [keyword, setKeyword] = useState("");
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const { data, isLoading, isRefetching } = useQuery({
     queryKey: ["posts", keyword],
     queryFn: getAllPosts,
@@ -25,6 +27,17 @@ const BlogPageLayout = () => {
       // Refresh data setelah post berhasil dibuat
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       setFormData({ title: "", description: "", author: "" });
+    },
+  });
+
+  const { mutate: removePost } = useMutation({
+    mutationFn: deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setDeletingId(null); // reset setelah sukses
+    },
+    onError: () => {
+      setDeletingId(null); // reset juga kalau error
     },
   });
 
@@ -59,7 +72,14 @@ const BlogPageLayout = () => {
             />
           </div>
         ) : (
-          data?.map((post) => <CardPost key={post.id} post={post} />)
+          data?.map((post) => (
+            <CardPost
+              key={post.id}
+              post={post}
+              onClick={() => setSelectedPostId(post.id)}
+              isDeleting={deletingId === post.id}
+            />
+          ))
         )}
       </div>
 
@@ -118,6 +138,32 @@ const BlogPageLayout = () => {
           </form>
         </div>
       </div>
+      {selectedPostId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur bg-opacity-50">
+          <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-md space-y-4">
+            <h3 className="text-lg font-semibold">Are you sure?</h3>
+            <p>Do you really want to delete this post?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-md border text-gray-600 hover:bg-gray-100"
+                onClick={() => setSelectedPostId(null)} // cancel
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                onClick={() => {
+                  setDeletingId(selectedPostId);
+                  removePost(selectedPostId);
+                  setSelectedPostId(null); // tutup modal setelah klik delete
+                }}
+              >
+                {deletingId === selectedPostId ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </BlogLayout>
   );
 };
