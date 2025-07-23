@@ -1,94 +1,124 @@
-import React from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createPost, getAllPosts } from "../services/post.service";
+import loading from "../assets/loading.png";
+import loadingButton from "../assets/loading-button.png";
+import BlogLayout from "../components/layouts/BlogLayout";
+import { CardPost } from "../components/ui/CardPost";
+import { SearchPost } from "../components/ui/SearchPost";
+import { FormInput } from "../components/form/FormInput";
+import { useState } from "react";
 
 const BlogPageLayout = () => {
+  const [keyword, setKeyword] = useState("");
+  const { data, isLoading, isRefetching } = useQuery({
+    queryKey: ["posts", keyword],
+    queryFn: getAllPosts,
+  });
+  const handleSearch = (value) => {
+    setKeyword(value);
+  };
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createPost,
+    onSuccess: () => {
+      // Refresh data setelah post berhasil dibuat
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setFormData({ title: "", description: "", author: "" });
+    },
+  });
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    author: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    mutate(formData);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Column: Card List */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Blog Posts</h2>
+    <BlogLayout>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold text-gray-800">Blog Posts</h2>
+        {isLoading || isRefetching ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <img
+              src={loading}
+              alt="loading"
+              className="w-12 h-12 animate-spin"
+            />
+          </div>
+        ) : (
+          data?.map((post) => <CardPost key={post.id} post={post} />)
+        )}
+      </div>
 
-          {/* Post Card */}
-          {[1, 2, 3].map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-white shadow rounded-xl p-6 space-y-2 border"
+      <div className="space-y-6 md:mt-10">
+        <SearchPost
+          onSearch={handleSearch}
+          label="Search Post"
+          placeholder="Search..."
+          buttonText="Search"
+        />
+
+        <div className="bg-white p-6 rounded-xl shadow space-y-4 border">
+          <h2 className="text-xl font-semibold text-gray-800">
+            Create New Post
+          </h2>
+
+          <form onSubmit={handleSubmit}>
+            <FormInput
+              label="Title"
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Input your title here"
+            />
+            <FormInput
+              label="Description"
+              type="textarea"
+              name="description"
+              onChange={handleChange}
+              value={formData.description}
+              placeholder="Input your description here"
+            />
+            <FormInput
+              label="Author"
+              type="text"
+              name="author"
+              onChange={handleChange}
+              value={formData.author}
+              placeholder="Input your author here"
+            />
+            <button
+              disabled={isPending}
+              className="flex justify-center items-center w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
             >
-              <h3 className="text-xl font-bold text-gray-800">Post Title</h3>
-              <p className="text-gray-600">
-                This is a sample article content that represents the post.
-              </p>
-              <p className="text-sm text-gray-400">By: Author Name</p>
-              <div className="flex gap-3 mt-2">
-                <button className="text-blue-600 hover:underline text-sm">
-                  Edit
-                </button>
-                <button className="text-red-600 hover:underline text-sm">
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Right Column: Search + Form */}
-        <div className="space-y-6">
-          {/* Search */}
-          <div>
-            <label className="block mb-2 font-medium text-gray-700">
-              Search Post
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Search by title..."
-                className="flex-1 border px-4 py-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                Search
-              </button>
-            </div>
-          </div>
-
-          {/* Create Form */}
-          <div className="bg-white p-6 rounded-xl shadow space-y-4 border">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Create New Post
-            </h2>
-
-            <div>
-              <label className="block text-sm mb-1 text-gray-700">Title</label>
-              <input
-                type="text"
-                className="w-full border px-4 py-2 rounded-md shadow-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1 text-gray-700">
-                Article
-              </label>
-              <textarea
-                className="w-full border px-4 py-2 rounded-md shadow-sm"
-                rows={4}
-              ></textarea>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1 text-gray-700">Author</label>
-              <input
-                type="text"
-                className="w-full border px-4 py-2 rounded-md shadow-sm"
-              />
-            </div>
-
-            <button className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
-              Submit Post
+              {isPending ? (
+                <img
+                  src={loadingButton}
+                  alt="loading"
+                  className="w-5 h-5 animate-spin flex justify-center items-center"
+                />
+              ) : (
+                "Submit Post"
+              )}
             </button>
-          </div>
+          </form>
         </div>
       </div>
-    </div>
+    </BlogLayout>
   );
 };
 

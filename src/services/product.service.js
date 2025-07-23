@@ -1,8 +1,9 @@
 import axios from "axios";
 
+const API_BASE_URL = "https://be-devarsip.vercel.app/api";
 export const getProducts = (callback) => {
   axios
-    .get("https://fakestoreapi.com/products")
+    .get(`${API_BASE_URL}/products`)
     .then((res) => {
       callback(res.data.slice(0, 3));
     })
