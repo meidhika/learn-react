@@ -17,6 +17,11 @@ export const createPost = async (newPost) => {
   return res.data;
 };
 
+export const updatePost = async ({ id, data }) => {
+  const response = await axios.put(`${API_BASE_URL}/posts/${id}`, data);
+  return response.data.data;
+};
+
 export const deletePost = async (id) => {
   const response = await axios.delete(`${API_BASE_URL}/posts/${id}`);
   return response.data;

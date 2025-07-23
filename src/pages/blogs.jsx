@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createPost, deletePost, getAllPosts } from "../services/post.service";
+import {
+  createPost,
+  deletePost,
+  getAllPosts,
+  updatePost,
+} from "../services/post.service";
 import loading from "../assets/loading.png";
 import loadingButton from "../assets/loading-button.png";
 import BlogLayout from "../components/layouts/BlogLayout";
@@ -12,6 +17,8 @@ const BlogPageLayout = () => {
   const [keyword, setKeyword] = useState("");
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [editingPost, setEditingPost] = useState(null);
+
   const { data, isLoading, isRefetching } = useQuery({
     queryKey: ["posts", keyword],
     queryFn: getAllPosts,
@@ -26,6 +33,15 @@ const BlogPageLayout = () => {
     onSuccess: () => {
       // Refresh data setelah post berhasil dibuat
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setFormData({ title: "", description: "", author: "" });
+    },
+  });
+
+  const { mutate: editPost, isPending: isUpdating } = useMutation({
+    mutationFn: updatePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      setEditingPost(null);
       setFormData({ title: "", description: "", author: "" });
     },
   });
@@ -56,7 +72,11 @@ const BlogPageLayout = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(formData);
+    if (editingPost) {
+      editPost({ id: editingPost.id, data: formData });
+    } else {
+      mutate(formData);
+    }
   };
 
   return (
@@ -78,6 +98,14 @@ const BlogPageLayout = () => {
               post={post}
               onClick={() => setSelectedPostId(post.id)}
               isDeleting={deletingId === post.id}
+              onClickEdit={() => {
+                setEditingPost(post);
+                setFormData({
+                  title: post.title,
+                  description: post.description,
+                  author: post.author,
+                });
+              }}
             />
           ))
         )}
@@ -122,15 +150,17 @@ const BlogPageLayout = () => {
               placeholder="Input your author here"
             />
             <button
-              disabled={isPending}
+              disabled={isPending || isUpdating}
               className="flex justify-center items-center w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
             >
-              {isPending ? (
+              {isPending || isUpdating ? (
                 <img
                   src={loadingButton}
                   alt="loading"
-                  className="w-5 h-5 animate-spin flex justify-center items-center"
+                  className="w-5 h-5 animate-spin"
                 />
+              ) : editingPost ? (
+                "Update Post"
               ) : (
                 "Submit Post"
               )}
