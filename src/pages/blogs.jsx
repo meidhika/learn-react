@@ -92,22 +92,24 @@ const BlogPageLayout = () => {
             />
           </div>
         ) : (
-          data?.map((post) => (
-            <CardPost
-              key={post.id}
-              post={post}
-              onClick={() => setSelectedPostId(post.id)}
-              isDeleting={deletingId === post.id}
-              onClickEdit={() => {
-                setEditingPost(post);
-                setFormData({
-                  title: post.title,
-                  description: post.description,
-                  author: post.author,
-                });
-              }}
-            />
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {data?.map((post) => (
+              <CardPost
+                key={post.id}
+                post={post}
+                onClick={() => setSelectedPostId(post.id)}
+                isDeleting={deletingId === post.id}
+                onClickEdit={() => {
+                  setEditingPost(post);
+                  setFormData({
+                    title: post.title,
+                    description: post.description,
+                    author: post.author,
+                  });
+                }}
+              />
+            ))}
+          </div>
         )}
       </div>
 
